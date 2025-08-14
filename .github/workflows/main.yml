@@ -14,41 +14,27 @@ env:
   BOOST_VERSION: 1_79_0
 
 jobs:
-  black:
+  lint-and-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v3
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Build and install
+      - name: Install ruff
         run: |
-          pip install black
+          pip install ruff
 
-      - name: Run black
+      - name: Run ruff linting
         run: |
-          black --check .
+          ruff check .
 
-  flake8:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.11"
-
-      - name: Build and install
+      - name: Run ruff formatting check
         run: |
-          pip install flake8
-
-      - name: Run Flake8
-        run: |
-          make flake8
+          ruff format --check .
 
   tests-c:
     runs-on: ubuntu-latest
@@ -82,21 +68,29 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python-version: "cp38-manylinux_x86_64"
-          - os: ubuntu-latest
-            python-version: "cp39-manylinux_x86_64"
-          - os: ubuntu-latest
             python-version: "cp310-manylinux_x86_64"
           - os: ubuntu-latest
             python-version: "cp311-manylinux_x86_64"
-          - os: windows-latest
-            python-version: "cp38-win_amd64"
-          - os: windows-latest
-            python-version: "cp39-win_amd64"
+          - os: ubuntu-latest
+            python-version: "cp312-manylinux_x86_64"
+          - os: ubuntu-latest
+            python-version: "cp313-manylinux_x86_64"
           - os: windows-latest
             python-version: "cp310-win_amd64"
           - os: windows-latest
             python-version: "cp311-win_amd64"
+          - os: windows-latest
+            python-version: "cp312-win_amd64"
+          - os: windows-latest
+            python-version: "cp313-win_amd64"
+          - os: macos-13
+            python-version: "cp310-macosx_x86_64"
+          - os: macos-13
+            python-version: "cp311-macosx_x86_64"
+          - os: macos-13
+            python-version: "cp312-macosx_x86_64"
+          - os: macos-13
+            python-version: "cp313-macosx_x86_64"
 
     runs-on: ${{ matrix.os }}
 
@@ -154,8 +148,7 @@ jobs:
     if: always()
 
     needs:
-      - black
-      - flake8
+      - lint-and-format
       - tests-c
       - build-wheels-and-test
 
