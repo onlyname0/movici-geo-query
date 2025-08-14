@@ -32,14 +32,25 @@ SRC_DIR = CURRENT_DIR / "src"
 
 _DEBUG = False
 _DEBUG_LEVEL = 0
+# Cross-platform compiler configuration
 if sys.platform.startswith("win32"):
-    extra_compile_args = []
+    # MSVC compiler flags
+    extra_compile_args = ["/std:c++17", "/EHsc"]
+    if _DEBUG:
+        extra_compile_args += ["/Od", "/Zi", f"/DDEBUG={_DEBUG_LEVEL}"]
+    else:
+        extra_compile_args += ["/O2", "/DNDEBUG"]
 else:
+    # GCC/Clang compiler flags (Linux, macOS)
     extra_compile_args = ["-Wall", "-Wextra", "-std=c++17"]
     if _DEBUG:
         extra_compile_args += ["-g3", "-O0", f"-DDEBUG={_DEBUG_LEVEL}", "-UNDEBUG"]
     else:
         extra_compile_args += ["-DNDEBUG", "-O3"]
+    
+    # macOS specific flags
+    if sys.platform.startswith("darwin"):
+        extra_compile_args += ["-mmacosx-version-min=10.14"]
 
 ext_modules = [
     Pybind11Extension(
