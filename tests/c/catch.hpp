@@ -6519,6 +6519,7 @@ namespace Catch {
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <random>
 
 namespace Catch {
 
@@ -6534,11 +6535,18 @@ namespace Catch {
 #endif
         template<typename V>
         static void shuffle( V& vector ) {
+#if defined(__cpp_lib_concepts) || (defined(_LIBCPP_VERSION) && _LIBCPP_VERSION >= 15000)
+            // For modern C++ standard libraries that require proper UniformRandomBitGenerator
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::shuffle(vector.begin(), vector.end(), gen);
+#else
             RandomNumberGenerator rng;
 #ifdef CATCH_CONFIG_CPP11_SHUFFLE
             std::shuffle( vector.begin(), vector.end(), rng );
 #else
             std::random_shuffle( vector.begin(), vector.end(), rng );
+#endif
 #endif
         }
     };
