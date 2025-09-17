@@ -14,6 +14,23 @@ env:
   BOOST_VERSION: 1_79_0
 
 jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check C++ formatting
+        run: |
+          find . -name '*.cpp' -o -name '*.hpp' -o -name '*.h' -o -name '*.cc' -o -name '*.cxx' | \
+          grep -v build | \
+          grep -v boost | \
+          xargs clang-format --dry-run --Werror
+
   black:
     runs-on: ubuntu-latest
     steps:
@@ -154,6 +171,7 @@ jobs:
     if: always()
 
     needs:
+      - clang-format
       - black
       - flake8
       - tests-c
